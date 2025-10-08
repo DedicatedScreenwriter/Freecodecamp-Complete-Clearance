@@ -8,3 +8,4 @@
 6. Learn HTML by creating a cat photo album application
 7. Learn layout by creating nutrition labels
 8. Learn-accessibility-by-building-a-quiz
+9. Learn-more-about-css-pseudo-selectors-by-building-a-balance-sheet
