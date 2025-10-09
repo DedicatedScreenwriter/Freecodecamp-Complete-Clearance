@@ -9,3 +9,4 @@
 7. Learn layout by creating nutrition labels
 8. Learn-accessibility-by-building-a-quiz
 9. Learn-more-about-css-pseudo-selectors-by-building-a-balance-sheet
+10. Learn-intermediate-css-by-building-a-cat-painting
