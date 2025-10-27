@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="freeCodeCamp Accessibility Quiz practice project" />
+    <title>Technical Documentation: Stardew Valley Game Systems</title>
+    <link rel="stylesheet" href="styles.css" />
+    <nav id="navbar">
+        <header>Technical Documentation: Stardew Valley Game Systems</header>
+        <ul>
+            <li><a class="nav-link" href="#Introduction_and_Core_Gameplay_Loop">Introduction and Core Gameplay
+                    Loop</a></li>
+            <li><a class="nav-link" href="#Player_Character_and_Stats">Player Character and Stats</a></li>
+            <li><a class="nav-link" href="#Farming_and_Agriculture_System">Farming and Agriculture System</a></li>
+            <li><a class="nav-link" href="#The_In-Game_Calendar_and_Season_System">The In-Game Calendar and Season
+                    System</a></li>
+            <li><a class="nav-link" href="#Tools_and_Resources_and_Crafting">Tools and Resources and Crafting</a></li>
+            <li><a class="nav-link" href="#Social_System_and_Quest_Architecture">Social System and Quest
+                    Architecture</a></li>
+            <li><a class="nav-link" href="#Reference">Reference</a></li>
+        </ul>
+    </nav>
+</head>
+
+<body>
+    <main id="main-doc">
+        <section class="main-section" id="Introduction_and_Core_Gameplay_Loop">
+            <header id="Introduction_and_Core_Gameplay_Loop">Introduction and Core Gameplay Loop</header>
+            <article>
+                <p>Stardew Valley is an open-ended country-life RPG developed by ConcernedApe. The core software
+                    architecture simulates a player-owned farm ecosystem, a social network with non-player characters
+                    (NPCs), and a resource management system. This document details the primary technical systems and
+                    data structures that govern the game's mechanics.</p>
+                <p>The fundamental procedural cycle that drives player engagement is a deterministic, time-based loop. A
+                    single in-game day (approximately 13.5 real-time minutes) follows this sequence:</p>
+                <ul>
+                    <li>Input/Decision Phase (Morning): The player assesses state variables (Energy, Health, Inventory)
+                        and plans daily objectives.</li>
+                    <li>Execution Phase (Day): The player interacts with game systems: Farming, Mining, Foraging,
+                        Fishing, or Socializing. These actions consume the primary resource: Time.</li>
+                    <li>Resource Conversion Phase: Actions convert Time and Energy into Items, Currency (G), Skill
+                        Experience (XP), and Social points.</li>
+                </ul>
+            </article>
+        </section>
+        <section class="main-section" id="Player_Character_and_Stats">
+            <header id="Player_Character_and_Stats">Player Character and Stats</header>
+            <article>
+                <h3>Character Creation Data Structure</h3>
+                <p>Upon initialization, the player defines a character profile with the following immutable and mutable
+                    properties:
+                </p>
+                <ul>
+                    <li>Name: String (Player-defined)</li>
+                    <li>FarmType: Enum (Standard, Riverland, Forest, Hill-top, Wilderness, Four-Corners, Beach)</li>
+                    <li>Appearance: Struct (Skin tone, hair style, hair color, shirt, accessories)</li>
+                    <li>Gender: Flag (Affects pronoun use by NPCs but not gameplay mechanics).</li>
+                </ul>
+                <h3>Core Attributes</h3>
+                <p>The player's state is managed by several key variables:</p>
+                <ul>
+                    <li>Health: Integer (0-100) - Depleted by combat; zero triggers incapacitation.</li>
+                    <li>Stamina: Integer (0-100) - Consumed by tool usage, fishing, and combat. Regenerates over time or
+                        via consumables.</li>
+                    <li>Money: Integer (G) - The universal currency for transactions.</li>
+                    <li>Inventory: Array[Slots] - A 12-slot container at game start, expandable up to 48 slots.</li>
+                </ul>
+                <h3>Skill System</h3>
+                <p>Skills are advanced by performing specific actions, granting permanent bonuses. The data model for
+                    each skill is:</p>
+                <ul>
+                    <li>Skill: Enum (Farming, Mining, Foraging, Fishing, Combat)</li>
+                    <li>Level: Integer (0-10) - Each level requires an increasing amount of
+                        <code>birthday: (Day, Season).</code>
+                    </li>
+                    <li>Proficiency_Unlocks: Array - New levels unlock crafting recipes and efficiency bonuses (e.g.,
+                        reduced energy cost).</li>
+                </ul>
+            </article>
+        </section>
+        <section class="main-section" id="Farming_and_Agriculture_System">
+            <header id="Farming_and_Agriculture_System">Farming and Agriculture System</header>
+            <article>
+                <h3>Core Farming Mechanics</h3>
+                <p>Farming is the primary economic engine. The system is governed by a grid-based tile map.
+                </p>
+                <h3>The Crop Growth Algorithm</h3>
+                <p>Each plantable tile is an object with the following properties:</p>
+                <ul>
+                    <li>Crop_ID: String</li>
+                    <li>Growth_Stage: Integer (0...n)</li>
+                    <li>Growth_Timer: Integer - Decremented daily if conditions are met.</li>
+                    <li>Watered_State: Boolean - If false, the timer does not decrement.</li>
+                    <li>Season: Enum - Crops will wither and die if the season changes and they are not multi-season.
+                    </li>
+                </ul>
+                <h3>Growth Conditions Pseudo-code:</h3>
+                <code>IF (Tile.Watered_State == True) AND (Crop.Season == Current_Season) THEN
+                    Crop.Growth_Timer -= 1;
+                    IF Crop.Growth_Timer <= 0 THEN Crop.Growth_Stage +=1; Reset Growth_Timer; IF
+                        Crop.Growth_Stage==Max_Stage THEN Set_Harvestable_State(True); END IF END IF END IF </code>
+            </article>
+        </section>
+        <section class="main-section" id="The_In-Game_Calendar_and_Season_System">
+            <header id="The_In-Game_Calendar_and_Season_System">The In-Game Calendar and Season System</header>
+            <article>
+                <h3>Time Data Structure</h3>
+                <p>The game uses a hierarchical time-keeping system:
+                </p>
+                <ul>
+                    <li>Minute: Integer (0-1330) - A day is 1330 minutes long (24 hours at ~55 seconds/hour).</li>
+                    <li>Time_of_Day: String (e.g., "Day", "Night").</li>
+                    <li>Day: Integer (1-28)</li>
+                    <li>Season: Enum (Spring, Summer, Fall, Winter)</li>
+                    <li>Season: Enum (Spring, Summer, Fall, Winter)
+                    </li>
+                </ul>
+                <h3>Seasonal Event Scheduling</h3>
+                <p>The season is a primary key for determining available content:</p>
+                <ul>
+                    <li>Crop Availability: Each crop has a valid_seasons[] property.</li>
+                    <li>Foraging Items: The items spawned in the wild are determined by Season.</li>
+                    <li>Festival Triggers: Specific (Day, Season) pairs trigger scripted events (e.g., (13, "Winter")
+                        triggers the Night Market).</li>
+                </ul>
+                <h3>Birthdays</h3>
+                <p>Each NPC has a <code>birthday: (Day, Season)</code> property. Gifting on this day yields a massive 8x
+                    friendship
+                    multiplier.</p>
+            </article>
+        </section>
+        <section class="main-section" id="Tools_and_Resources_and_Crafting">
+            <header id="Tools_and_Resources_and_Crafting">Tools and Resources and Crafting</header>
+            <article>
+                <h3>5.1 Tool Upgrade System</h3>
+                <p>Tools (Axe, Pickaxe, Hoe, Watering Can, Trash Can) follow a linear upgrade path:
+                </p>
+                <code>Basic -> Copper -> Steel -> Gold -> Iridium</code>
+                <h3>Crafting Recipe Data Model</h3>
+                <p>A crafting recipe is a data object containing:</p>
+                <ul>
+                    <li>Recipe_ID: String</li>
+                    <li>Ingredients: Dictionary(Item_ID, Quantity)</li>
+                    <li>Output: Item_ID</li>
+                    <li>Unlock_Condition: String (e.g., "Farming Level 4", "Found in Wild")</li>
+                </ul>
+                <h3>Resource Node Respawning</h3>
+                <p>Resource nodes (Trees, Rocks, Ore) have respawn algorithms based on random chance and location. For
+                    example, a map cell designated for tree spawning may have a daily 15% chance to spawn a new tree
+                    sapling if the cell is empty.</p>
+            </article>
+        </section>
+        <section class="main-section" id="Social_System_and_Quest_Architecture">
+            <header id="Social_System_and_Quest_Architecture">Social System and Quest Architecture</header>
+            <article>
+                <h3>NPC Friendship Algorithm</h3>
+                <p>Friendship with NPCs is a core "technology." Each NPC has a hidden Friendship_Points value (range
+                    -250 to 2500). Daily interactions modify this value:
+                </p>
+                <ul>
+                    <li>Talk to NPC: +20 Points (once per day)</li>
+                    <li>Give a Liked/Loved Gift: +45/+80 Points (once per day, double on birthday)</li>
+                    <li>Give a Hated Gift: -40 Points</li>
+                </ul>
+                <h3> Quest System Architecture</h3>
+                <p>Quests are managed as temporary objectives with specific completion criteria.</p>
+                <code>
+                    Quest {
+                        String: Title;
+                        String: Description;
+                        String: Objective; // e.g., "Collect 20 Copper Ore"
+                        Integer: Current_Count;
+                        Integer: Required_Count;
+                        String: Reward; // e.g., "500g 1 Friendship"
+                        Boolean: Is_Completed;
+                        Date: Expiration_Date; // Optional
+                    }
+                </code>
+                <h3>Community Center Bundle System</h3>
+                <p>This is a complex, multi-tiered quest system. The Community Center contains "Bundles," which are
+                    collections of specific items. When a bundle is completed, it triggers a reward and unlocks the next
+                    bundle or game feature, ultimately driving the main narrative arc related to the Joja Corporation.
+                </p>
+            </article>
+        </section>
+        <section class="main-section" id="Reference">
+            <header>Reference</header>
+            <article>
+                <h3>All the documentation in this page is taken from <a
+                        href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide">MDN</a></h3>
+            </article>
+        </section>
+    </main>
+</body>
+
+</html>
