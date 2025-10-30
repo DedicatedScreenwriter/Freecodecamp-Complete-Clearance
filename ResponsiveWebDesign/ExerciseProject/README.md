@@ -11,3 +11,5 @@
 9. Learn-more-about-css-pseudo-selectors-by-building-a-balance-sheet
 10. Learn-intermediate-css-by-building-a-cat-painting
 11. Learn-responsive-web-design-by-building-a-piano
+12. Learn-css-variables-by-building-a-city-skyline
+13. Learn-css-grid-by-building-a-magazine
