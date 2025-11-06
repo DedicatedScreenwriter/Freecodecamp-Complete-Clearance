@@ -13,3 +13,4 @@
 11. Learn-responsive-web-design-by-building-a-piano
 12. Learn-css-variables-by-building-a-city-skyline
 13. Learn-css-grid-by-building-a-magazine
+14. Learn-css-animation-by-building-a-ferris-wheel
